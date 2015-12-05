@@ -5,14 +5,17 @@ let mockTweets = [
 	{
 		  name: 'Ryan Walsh'
 		, body: 'My #FirstTweet'
+		, id: 1
 	}
 	, {
 		  name: 'Ryan Walsh'
 		, body: 'My #SecondTweet'
+		, id: 2
 	}
 	, {
 		  name: 'Ryan Walsh'
 		, body: 'My #ThirdTweet'
+		, id: 3
 	}
 ];
 
