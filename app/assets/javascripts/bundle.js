@@ -51,11 +51,11 @@
 	
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
-	var _TweetBox = __webpack_require__(/*! ./components/TweetBox */ 2);
+	var _TweetBox = __webpack_require__(/*! ./components/TweetBox */ 1);
 	
 	var _TweetBox2 = _interopRequireDefault(_TweetBox);
 	
-	var _TweetsList = __webpack_require__(/*! ./components/TweetsList */ 3);
+	var _TweetsList = __webpack_require__(/*! ./components/TweetsList */ 2);
 	
 	var _TweetsList2 = _interopRequireDefault(_TweetsList);
 	
@@ -67,37 +67,54 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var mockTweets = [{
-		name: 'Ryan Walsh',
-		body: 'My #FirstTweet',
-		id: 1
-	}, {
-		name: 'Ryan Walsh',
-		body: 'My #SecondTweet',
-		id: 2
-	}, {
-		name: 'Ryan Walsh',
-		body: 'My #ThirdTweet',
-		id: 3
-	}];
-	
 	var Main = (function (_React$Component) {
 		_inherits(Main, _React$Component);
 	
-		function Main() {
+		function Main(props) {
 			_classCallCheck(this, Main);
 	
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(Main).apply(this, arguments));
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Main).call(this, props));
+	
+			_this.state = { tweetsList: [] };
+			return _this;
 		}
 	
 		_createClass(Main, [{
+			key: 'addTweet',
+			value: function addTweet(tweetToAdd) {
+				var _this2 = this;
+	
+				$.post('/tweets', { body: tweetToAdd }).success(function (savedTweet) {
+					console.log(savedTweet);
+					var newTweetsList = _this2.state.tweetsList;
+					newTweetsList.unshift(savedTweet);
+	
+					_this2.setState({
+						tweetsList: newTweetsList
+					});
+				}).error(function (err) {
+					return console.log(err);
+				});
+			}
+		}, {
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				var _this3 = this;
+	
+				$.ajax('/tweets').success(function (tweets) {
+					return _this3.setState({ tweetsList: tweets });
+				}).error(function (err) {
+					return console.log(err);
+				});
+			}
+		}, {
 			key: 'render',
 			value: function render() {
 				return React.createElement(
 					'div',
 					{ className: 'container' },
-					React.createElement(_TweetBox2.default, null),
-					React.createElement(_TweetsList2.default, { tweets: mockTweets })
+					React.createElement(_TweetBox2.default, { sendTweet: this.addTweet.bind(this) }),
+					React.createElement(_TweetsList2.default, { tweets: this.state.tweetsList })
 				);
 			}
 		}]);
@@ -106,14 +123,17 @@
 	})(React.Component);
 	
 	var documentReady = function documentReady() {
-		ReactDOM.render(React.createElement(Main, null), document.getElementById('react'));
+		var reactNode = document.getElementById('react');
+	
+		if (reactNode) {
+			ReactDOM.render(React.createElement(Main, null), reactNode);
+		}
 	};
 	
 	$(documentReady);
 
 /***/ },
-/* 1 */,
-/* 2 */
+/* 1 */
 /*!*****************************************************!*\
   !*** ./app/assets/frontend/components/TweetBox.jsx ***!
   \*****************************************************/
@@ -143,6 +163,14 @@
 		}
 	
 		_createClass(TweetBox, [{
+			key: "sendTweet",
+			value: function sendTweet(event) {
+				event.preventDefault();
+	
+				this.props.sendTweet(this.refs.tweetTextArea.value);
+				this.refs.tweetTextArea.value = '';
+			}
+		}, {
 			key: "render",
 			value: function render() {
 				return React.createElement(
@@ -150,11 +178,11 @@
 					{ className: "row" },
 					React.createElement(
 						"form",
-						null,
+						{ onSubmit: this.sendTweet.bind(this) },
 						React.createElement(
 							"div",
 							{ className: "input-field" },
-							React.createElement("textarea", { className: "materialize-textarea" }),
+							React.createElement("textarea", { ref: "tweetTextArea", className: "materialize-textarea" }),
 							React.createElement(
 								"label",
 								null,
@@ -162,7 +190,7 @@
 							),
 							React.createElement(
 								"button",
-								{ className: "btn right" },
+								{ type: "submit", className: "btn right" },
 								"Tweet"
 							)
 						)
@@ -177,7 +205,7 @@
 	exports.default = TweetBox;
 
 /***/ },
-/* 3 */
+/* 2 */
 /*!*******************************************************!*\
   !*** ./app/assets/frontend/components/TweetsList.jsx ***!
   \*******************************************************/
@@ -193,7 +221,7 @@
 		value: true
 	});
 	
-	var _Tweet = __webpack_require__(/*! ./Tweet */ 4);
+	var _Tweet = __webpack_require__(/*! ./Tweet */ 3);
 	
 	var _Tweet2 = _interopRequireDefault(_Tweet);
 	
@@ -239,7 +267,7 @@
 	exports.default = TweetsList;
 
 /***/ },
-/* 4 */
+/* 3 */
 /*!**************************************************!*\
   !*** ./app/assets/frontend/components/Tweet.jsx ***!
   \**************************************************/
